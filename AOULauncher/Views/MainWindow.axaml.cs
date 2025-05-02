@@ -277,7 +277,11 @@ public partial class MainWindow : Window
         {
             Title = "Open Among Us.exe",
             AllowMultiple = false,
+#if LINUX
+            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among?Us.exe"]}]
+#else
             FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among Us.exe"]}]
+#endif
         });
         
         if (picked.Count <= 0)
