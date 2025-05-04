@@ -1,0 +1,117 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="350"
+        x:Class="AOULauncher.Views.LinuxWarningDialog"
+        WindowStartupLocation="CenterOwner"
+        Width="600" Height="350" CanResize="False"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        Title="Linux Setup Required">
+
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="0.95"
+                    MaterialOpacity="0.7"/>
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <Grid RowDefinitions="Auto,*,Auto">
+            <TextBlock Grid.Row="0"
+                       Margin="20,20,20,10"
+                       FontSize="20"
+                       FontWeight="Light"
+                       Foreground="#FF4050"
+                       Text="Linux Setup Required">
+                <TextBlock.Effect>
+                    <DropShadowDirectionEffect
+                        BlurRadius="15"
+                        ShadowDepth="0"/>
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <StackPanel Grid.Row="1" Margin="20,0,20,10">
+                <TextBlock TextWrapping="Wrap"
+                           Foreground="#DDD"
+                           FontWeight="Light"
+                           Margin="0,0,0,10">
+                    Because you are on Linux, you need to set up a DLL override for winhttp.dll.
+                </TextBlock>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <Button Name="ProtontricksLink"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            Foreground="#7289da"
+                            Click="ProtontricksLink_Click">
+                        <TextBlock Text="Use protontricks" TextDecorations="Underline"/>
+                    </Button>
+                    <TextBlock Text=" or add the following to your game's launch options in Steam:"
+                               Foreground="#DDD"
+                               FontWeight="Light"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Border Background="#222"
+                        BorderBrush="#555"
+                        BorderThickness="1"
+                        CornerRadius="3"
+                        Padding="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Name="CommandText"
+                                 Grid.Column="0"
+                                 Text="WINEDLLOVERRIDES=&quot;winhttp=n,b&quot; %command%"
+                                 Foreground="#FFBB00"
+                                 Background="#222"
+                                 BorderThickness="0"
+                                 IsReadOnly="True"
+                                 VerticalAlignment="Center"
+                                 TextWrapping="Wrap"/>
+
+                        <Button Grid.Column="1"
+                                Background="#333"
+                                Name="CopyButton"
+                                Margin="8,0,0,0"
+                                Padding="8,4"
+                                Click="CopyButton_Click">
+                            <Grid>
+                                <TextBlock
+                                    Name="CopyText"
+                                    FontSize="16"
+                                    FontWeight="UltraLight"
+                                    IsVisible="True">
+                                    Copy
+                                </TextBlock>
+                                <TextBlock
+                                    Name="CopiedText"
+                                    FontSize="16"
+                                    FontWeight="UltraLight"
+                                    IsVisible="False">
+                                    Copied!
+                                </TextBlock>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <Button Grid.Row="2"
+                    HorizontalAlignment="Right"
+                    Margin="20"
+                    Padding="20,10"
+                    Click="OkButton_Click">
+                <TextBlock
+                    FontSize="20"
+                    FontWeight="UltraLight">
+                    OK
+                </TextBlock>
+            </Button>
+        </Grid>
+    </Panel>
+</Window>

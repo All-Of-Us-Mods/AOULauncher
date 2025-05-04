@@ -118,8 +118,12 @@ public partial class MainWindow : Window
         Process.Start(Path.Combine(AppContext.BaseDirectory, "AOULauncher.exe"));
         Process.GetCurrentProcess().Kill();
     }
-    
+
+#if LINUX
+    public async void LoadAmongUsPath()
+#else
     public void LoadAmongUsPath()
+#endif
     {
         Console.Out.WriteLine("Loading Among Us Path");
         ProgressBar.Value = 0;
@@ -148,7 +152,15 @@ public partial class MainWindow : Window
         {
             ResetLaunchWarning();
         }
-       
+
+#if LINUX
+        var linuxDialog = new LinuxWarningDialog
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        await linuxDialog.ShowDialog<bool?>(this);
+#endif
+
         ProgressBar.ProgressTextFormat = "";
 
         var bepInExPlugins = new DirectoryInfo(Path.Combine(Constants.ModFolder, "BepInEx", "plugins"));
