@@ -10,7 +10,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets/launchpad.ico</ApplicationIcon>
         <LangVersion>latest</LangVersion>
-        <Version>0.3.0.1</Version>
+        <Version>0.3.0.2</Version>
     </PropertyGroup>
 
     <ItemGroup>

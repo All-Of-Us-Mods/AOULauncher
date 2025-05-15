@@ -2,40 +2,35 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using AOULauncher.Enum;
+using System.Reflection.PortableExecutable;
 using Microsoft.Win32;
 
 namespace AOULauncher.Tools;
 
 public static class AmongUsLocator
 {
-    public static AmongUsPlatform? GetPlatform(string path, ModPackData modPackData)
+    private const string EosDllRelativePath = "Among Us_Data/Plugins/x86/GfxPluginEGS.dll";
+
+    public static bool Is64Bit(string path)
+    {
+        using var stream = File.OpenRead(path);
+        using var reader = new PEReader(stream);
+        return reader.PEHeaders.PEHeader?.Magic == PEMagic.PE32Plus;
+    }
+
+    public static IAmongUsLauncher? GetLauncher(string path)
     {
         if (!VerifyAmongUsDirectory(path))
         {
             return null;
         }
 
-        var globalGameFile = new FileInfo(Path.Combine(path, "Among Us_Data", "globalgamemanagers"));
-
-        if (!globalGameFile.Exists)
+        if (File.Exists(Path.GetFullPath(EosDllRelativePath, path)))
         {
-            return null;
-        }
-        
-        var hash = Utilities.FileToHash(globalGameFile.FullName);
-        var platform = AmongUsPlatform.Unknown;
-        for (var i = 0; i < modPackData.PlatformHashes.Length; i++)
-        {
-            var pHash = modPackData.PlatformHashes[i];
-            if (pHash == hash)
-            {
-                platform = (AmongUsPlatform)i;
-                break;
-            }
+            return new EpicLauncher();
         }
 
-        return platform;
+        return new NormalLauncher(Path.Combine(path, "Among Us.exe"));
     }
     
     

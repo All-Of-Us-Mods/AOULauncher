@@ -28,7 +28,7 @@ public class InstallState(MainWindow window) : AbstractLauncherState(window)
     {
         Utilities.KillAmongUs();
 
-        if (Config.Platform is AmongUsPlatform.Microsoft)
+        if (AmongUsLocator.Is64Bit(Path.Combine(Config.AmongUsPath, "Among Us.exe")))
         {
             await InstallZip("BepInEx64.zip", Constants.ModFolder, Config.ModPackData.BepInEx64);
         }

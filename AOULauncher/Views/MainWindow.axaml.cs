@@ -139,16 +139,6 @@ public partial class MainWindow : Window
             }
         }
 
-        Config.Platform = AmongUsLocator.GetPlatform(Config.AmongUsPath, Config.ModPackData) ?? AmongUsPlatform.Unknown;
-        if (Config.Platform is AmongUsPlatform.Unknown)
-        { 
-            SetLaunchWarning("Unknown platform/game version detected!\nYou may be running an incompatible version of Among Us.");
-        }
-        else
-        {
-            ResetLaunchWarning();
-        }
-
         if (OperatingSystem.IsLinux())
         {
             var linuxDialog = new LinuxWarningDialog
@@ -210,19 +200,7 @@ public partial class MainWindow : Window
     {
         InfoIcon.IsVisible = false;
         InfoText.Foreground = Brush.Parse("#555");
-        InfoText.Text = $"Platform: {Config.Platform}\n{Config.AmongUsPath}";
-    }
-
-    public void ResetLaunchWarning()
-    {
-        LaunchWarning.Text = "Launching with mods takes time!\nPlease be patient.";
-        LaunchWarning.IsVisible = false;
-    }
-
-    public void SetLaunchWarning(string text)
-    {
-        LaunchWarning.Text = text;
-        LaunchWarning.IsVisible = true;
+        InfoText.Text = Config.AmongUsPath;
     }
 
     public void AmongUsOnExit()
@@ -242,31 +220,27 @@ public partial class MainWindow : Window
     {
         Console.Out.WriteLine("Uninstalling");
 
-        // we manipulate the doorstop config for epic and steam, so we need to restore it
-        if (AmongUsLocator.GetPlatform(Config.AmongUsPath, Config.ModPackData) is AmongUsPlatform.Epic or AmongUsPlatform.Steam)
+        var doorstopBackup = new FileInfo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini.bak"));
+        if (doorstopBackup.Exists)
         {
-            var doorstopBackup = new FileInfo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini.bak"));
-            if (doorstopBackup.Exists)
+            Console.Out.WriteLine("Restoring doorstop config");
+            var doorstopConfig = new FileInfo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini"));
+            if (doorstopConfig.Exists)
             {
-                Console.Out.WriteLine("Restoring doorstop config");
-                var doorstopConfig = new FileInfo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini"));
-                if (doorstopConfig.Exists)
-                {
-                    doorstopConfig.Delete();
-                }
-
-                doorstopBackup.MoveTo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini"));
+                doorstopConfig.Delete();
             }
-            else
+
+            doorstopBackup.MoveTo(Path.Combine(Config.AmongUsPath, "doorstop_config.ini"));
+        }
+        else
+        {
+            Console.Out.WriteLine("No doorstop config backup found, uninstalling completely");
+            foreach (var file in Constants.UninstallPaths)
             {
-                Console.Out.WriteLine("No doorstop config backup found, uninstalling completely");
-                foreach (var file in Constants.UninstallPaths)
+                var info = new FileInfo(Path.Combine(Config.AmongUsPath, file));
+                if (info.Exists)
                 {
-                    var info = new FileInfo(Path.Combine(Config.AmongUsPath, file));
-                    if (info.Exists)
-                    {
-                        info.Delete();
-                    }
+                    info.Delete();
                 }
             }
         }

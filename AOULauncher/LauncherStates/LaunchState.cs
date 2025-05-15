@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
-using AOULauncher.Enum;
 using AOULauncher.Tools;
 using AOULauncher.Views;
 
@@ -15,7 +14,7 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
 
         // make sure bepinex is set to match platform:
         ZipArchive zipFile;
-        if (Window.Config.Platform is AmongUsPlatform.Microsoft)
+        if (AmongUsLocator.Is64Bit(Path.Combine(Window.Config.AmongUsPath, "Among Us.exe")))
         {
             zipFile = await Window.HttpClient.DownloadZip("BepInEx64.zip", Constants.DataLocation, Window.Config.ModPackData.BepInEx64);
         }
@@ -23,6 +22,7 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
         {
             zipFile = await Window.HttpClient.DownloadZip("BepInEx32.zip", Constants.DataLocation, Window.Config.ModPackData.BepInEx);
         }
+
         zipFile.ExtractToDirectory(Constants.ModFolder, true);
  
         // copy doorstop
@@ -36,20 +36,15 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
             cheater.MoveTo(Path.ChangeExtension(cheater.FullName, ".dll.no"));
         }
 
-        var platform = AmongUsLocator.GetPlatform(Config.AmongUsPath, Config.ModPackData);
+        var launcher = AmongUsLocator.GetLauncher(Config.AmongUsPath);
 
-        if (platform is null)
+        if (launcher is null)
         {
             Window.LoadAmongUsPath();
             return;
         }
 
-        // necessary for epic because it doesn't have a URI to launch with arguments
-        // steam does, but it puts up a warning, so we just bypass by using doorstop config
-        if (platform is AmongUsPlatform.Epic or AmongUsPlatform.Steam)
-        {
-            await SetDoorstopConfig();
-        }
+        await SetDoorstopConfig();
 
         var targetAssembly = Path.Combine(Constants.ModFolder, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll");
         var coreclrDir = Path.Combine(Constants.ModFolder, "dotnet");
@@ -62,8 +57,7 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
             $"--doorstop-clr-runtime-coreclr-path \"{coreclrPath}\""
         ];
 
-        var launcher = new AmongUsLauncher(Config.AmongUsPath, platform.Value, Window.AmongUsOnExit, arguments);
-        launcher.Launch();
+        launcher.Launch(Window.AmongUsOnExit, arguments);
         Window.LaunchWarning.IsVisible = true;
     }
 
