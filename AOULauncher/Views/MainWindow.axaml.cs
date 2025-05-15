@@ -119,11 +119,7 @@ public partial class MainWindow : Window
         Process.GetCurrentProcess().Kill();
     }
 
-#if LINUX
-    public async void LoadAmongUsPath()
-#else
     public void LoadAmongUsPath()
-#endif
     {
         Console.Out.WriteLine("Loading Among Us Path");
         ProgressBar.Value = 0;
@@ -153,13 +149,14 @@ public partial class MainWindow : Window
             ResetLaunchWarning();
         }
 
-#if LINUX
-        var linuxDialog = new LinuxWarningDialog
+        if (OperatingSystem.IsLinux())
         {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner
-        };
-        await linuxDialog.ShowDialog<bool?>(this);
-#endif
+            var linuxDialog = new LinuxWarningDialog
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            linuxDialog.ShowDialog(this);
+        }
 
         ProgressBar.ProgressTextFormat = "";
 
@@ -285,15 +282,12 @@ public partial class MainWindow : Window
             return;
         }
         
+        var pattern = OperatingSystem.IsLinux() ? "Among?Us.exe" : "Among Us.exe";
         var picked = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open Among Us.exe",
             AllowMultiple = false,
-#if LINUX
-            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among?Us.exe"]}]
-#else
-            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among Us.exe"]}]
-#endif
+            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = [pattern]}]
         });
         
         if (picked.Count <= 0)
