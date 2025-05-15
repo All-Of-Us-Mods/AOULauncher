@@ -118,7 +118,7 @@ public partial class MainWindow : Window
         Process.Start(Path.Combine(AppContext.BaseDirectory, "AOULauncher.exe"));
         Process.GetCurrentProcess().Kill();
     }
-    
+
     public void LoadAmongUsPath()
     {
         Console.Out.WriteLine("Loading Among Us Path");
@@ -137,6 +137,15 @@ public partial class MainWindow : Window
                 LauncherState = new RefreshState(this);
                 return;
             }
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            var linuxDialog = new LinuxWarningDialog
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            linuxDialog.ShowDialog(this);
         }
 
         ProgressBar.ProgressTextFormat = "";
@@ -247,11 +256,12 @@ public partial class MainWindow : Window
             return;
         }
         
+        var pattern = OperatingSystem.IsLinux() ? "Among?Us.exe" : "Among Us.exe";
         var picked = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open Among Us.exe",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among Us.exe"]}]
+            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = [pattern]}]
         });
         
         if (picked.Count <= 0)
