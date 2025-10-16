@@ -1,7 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
-using AOULauncher.Enum;
 using AOULauncher.Tools;
 using AOULauncher.Views;
 
@@ -26,18 +26,29 @@ public class InstallState(MainWindow window) : AbstractLauncherState(window)
     // installs the mod to the ModFolder directory. see the launching logic further down for how doorstop is used
     private async Task InstallMod()
     {
-        Utilities.KillAmongUs();
+        try
+        {
+            Utilities.KillAmongUs();
 
-        if (AmongUsLocator.Is64Bit(Path.Combine(Config.AmongUsPath, "Among Us.exe")))
-        {
-            await InstallZip("BepInEx64.zip", Constants.ModFolder, Config.ModPackData.BepInEx64);
+            PermissionHelper.GrantGameDirectoryAccess(Config.AmongUsPath);
+
+            if (AmongUsLocator.Is64Bit(Path.Combine(Config.AmongUsPath, "Among Us.exe")))
+            {
+                await InstallZip("BepInEx64.zip", Constants.ModFolder, Config.ModPackData.BepInEx64);
+            }
+            else
+            {
+                await InstallZip("BepInEx32.zip", Constants.ModFolder, Config.ModPackData.BepInEx);
+            }
+
+            await InstallPlugins(Constants.ModFolder);
+            await InstallZip("ExtraData.zip", Constants.ModFolder, Config.ModPackData.ExtraData);
         }
-        else
+        catch (Exception e)
         {
-            await InstallZip("BepInEx32.zip", Constants.ModFolder, Config.ModPackData.BepInEx);
+            await File.AppendAllTextAsync("ErrorLog.txt", $"[{DateTime.Now}] {e}");
+            Window.LauncherState = new InstallState(Window);
         }
-        await InstallPlugins(Constants.ModFolder);
-        await InstallZip("ExtraData.zip", Constants.ModFolder, Config.ModPackData.ExtraData);
     }
     
     private async Task InstallZip(string name, string directory, ModPackData.ZipData zipData)

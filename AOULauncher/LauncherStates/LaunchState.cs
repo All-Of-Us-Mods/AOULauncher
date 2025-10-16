@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AOULauncher.Tools;
 using AOULauncher.Views;
@@ -24,17 +25,6 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
         }
 
         zipFile.ExtractToDirectory(Constants.ModFolder, true);
- 
-        // copy doorstop
-        CopyFromModToGame("winhttp.dll");
-
-        Window.LauncherState = new RunningState(Window);
-
-        var cheater = new FileInfo(Path.GetFullPath("version.dll", Config.AmongUsPath));
-        if (cheater.Exists)
-        {
-            cheater.MoveTo(Path.ChangeExtension(cheater.FullName, ".dll.no"));
-        }
 
         var launcher = AmongUsLocator.GetLauncher(Config.AmongUsPath);
 
@@ -44,7 +34,27 @@ public class LaunchState(MainWindow window) : AbstractLauncherState(window)
             return;
         }
 
-        await SetDoorstopConfig();
+        if (launcher.CopyDoorstop)
+        {
+            // copy doorstop and config
+            CopyFromModToGame("winhttp.dll");
+            await SetDoorstopConfig();
+        }
+
+        Window.LauncherState = new RunningState(Window);
+
+        try
+        {
+            var cheater = new FileInfo(Path.GetFullPath("version.dll", Config.AmongUsPath));
+            if (cheater.Exists)
+            {
+                cheater.MoveTo(Path.ChangeExtension(cheater.FullName, ".dll.no"));
+            }
+        }
+        catch
+        {
+            // ignored
+        }
 
         var targetAssembly = Path.Combine(Constants.ModFolder, "BepInEx", "core", "BepInEx.Unity.IL2CPP.dll");
         var coreclrDir = Path.Combine(Constants.ModFolder, "dotnet");

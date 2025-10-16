@@ -7,6 +7,8 @@ namespace AOULauncher.Tools;
 
 public class EpicLauncher : IAmongUsLauncher
 {
+    public bool CopyDoorstop => true;
+
     public void Launch(Action onExit, params string[] args)
     {
         var psi = new ProcessStartInfo("com.epicgames.launcher://apps/33956bcb55d4452d8c47e16b94e294bd%3A729a86a5146640a2ace9e8c595414c56%3A963137e4c29d4c79a81323b8fab03a40?action=launch&silent=true")
