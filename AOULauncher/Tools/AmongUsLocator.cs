@@ -10,6 +10,7 @@ namespace AOULauncher.Tools;
 public static class AmongUsLocator
 {
     private const string EosDllRelativePath = "Among Us_Data/Plugins/x86/GfxPluginEGS.dll";
+    private const string Eos64DllRelativePath = "Among Us_Data/Plugins/x86_64/GfxPluginEGS.dll";
 
     public static bool Is64Bit(string path)
     {
@@ -25,9 +26,10 @@ public static class AmongUsLocator
             return null;
         }
 
-        if (File.Exists(Path.GetFullPath(EosDllRelativePath, path)))
+        if (File.Exists(Path.GetFullPath(EosDllRelativePath, path)) ||
+            File.Exists(Path.GetFullPath(Eos64DllRelativePath, path)))
         {
-            return new EpicLauncher();
+            return new EpicLauncher(Path.Combine(path, "Among Us.exe"));
         }
 
         return new NormalLauncher(Path.Combine(path, "Among Us.exe"));

@@ -10,9 +10,8 @@ public partial class Error : Window
         ErrorText.Text = "An error occurred.";
     }
 
-    public Error(string error)
+    public Error(string error) : this()
     {
-        InitializeComponent();
         ErrorText.Text = error;
     }
 }

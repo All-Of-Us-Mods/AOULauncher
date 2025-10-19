@@ -250,42 +250,50 @@ public partial class MainWindow : Window
     
     private async void OpenDirectoryPicker(object? _, RoutedEventArgs e)
     {
-        if (LauncherState is LoadingState or RunningState)
+        try
         {
-            return;
-        }
+            if (LauncherState is LoadingState or RunningState)
+            {
+                return;
+            }
         
-        var picked = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = "Open Among Us.exe",
-            AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among Us.exe"]}]
-        });
+            var picked = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Open Among Us.exe",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Among Us"){Patterns = ["Among Us.exe"]}]
+            });
         
-        if (picked.Count <= 0)
-        {
-            return;
-        }
+            if (picked.Count <= 0)
+            {
+                return;
+            }
 
-        var file = new FileInfo(picked[0].Path.LocalPath);
+            var file = new FileInfo(picked[0].Path.LocalPath);
         
-        if (file.Directory is not null && AmongUsLocator.VerifyAmongUsDirectory(file.Directory.FullName))
-        {
-            Config.AmongUsPath = file.Directory.FullName;
-            LoadAmongUsPath();
+            if (file.Directory is not null && AmongUsLocator.VerifyAmongUsDirectory(file.Directory.FullName))
+            {
+                Config.AmongUsPath = file.Directory.FullName;
+                LoadAmongUsPath();
+            }
         }
-
+        catch (Exception ex)
+        {
+            var window = new Error(ex.Message);
+            window.Show();
+            window.Activate();
+        }
     }
 
-    private async void DiscordLinkOnClick(object? _, RoutedEventArgs e)
+    private void DiscordLinkOnClick(object? _, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo("https://dsc.gg/allofus") {UseShellExecute = true});
         var clipboard = GetTopLevel(this)?.Clipboard;
-        var dataObject = new DataObject();
-        dataObject.Set(DataFormats.Text, "https://dsc.gg/allofus");
+        var dataObject = new DataTransfer();
+        dataObject.Add(DataTransferItem.Create(DataFormat.Text, "https://dsc.gg/allofus"));
         if (clipboard is not null)
         {
-            await clipboard.SetDataObjectAsync(dataObject);
+            Task.Run(()=> clipboard.SetDataAsync(dataObject));
         }
     }
 
